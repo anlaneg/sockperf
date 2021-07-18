@@ -195,7 +195,8 @@ int tls_init(void) {
         }
 
         if (SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 |
-                                         SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_3) <= 0) {
+                                         SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_3 |
+                                         SSL_OP_IGNORE_UNEXPECTED_EOF) <= 0) {
             SSL_CTX_free(ctx);
             log_err("Unable to set protocol: %s", "TLSv1.2");
             rc = SOCKPERF_ERR_FATAL;
