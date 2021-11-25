@@ -132,7 +132,9 @@ static const struct app_modes {
     const char *const shorts[4];          /* short name */
     const char *note;                     /* mode description */
 } sockperf_modes[] = {
+        /*显示帮助*/
       { proc_mode_help, "help", aopt_set_string("h", "?"), "Display list of supported commands." },
+      /*显示帮助*/
       { proc_mode_version, "--version", aopt_set_string(NULL), "Tool version information." },
       { proc_mode_under_load,  "under-load",
         aopt_set_string("ul"), "Run " MODULE_NAME " client for latency under load test." },
@@ -142,6 +144,7 @@ static const struct app_modes {
         "Run " MODULE_NAME " client for latency test using playback of predefined traffic, based "
         "on timeline and message size." },
       { proc_mode_throughput,  "throughput",
+        /*单向吞吐测试*/
         aopt_set_string("tp"), "Run " MODULE_NAME " client for one way throughput test." },
       { proc_mode_server, "server", aopt_set_string("sr"), "Run " MODULE_NAME " as a server." },
       { NULL, NULL, aopt_set_string(NULL), NULL }
@@ -929,14 +932,17 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
      * List of supported throughput options.
      */
     const AOPT_DESC self_opt_desc[] = {
+            /*测试时间*/
         { 't',                                                 AOPT_ARG,
           aopt_set_literal('t'),                               aopt_set_string("time"),
           "Run for <sec> seconds (default 1, max = 36000000)." },
+          /*客户端端口号*/
         { OPT_CLIENTPORT,
           AOPT_ARG,
           aopt_set_literal(0),
           aopt_set_string("client_port"),
           "Force the client side to bind to a specific port (default = 0). " },
+          /*客户端ip*/
         { OPT_CLIENTIP,
           AOPT_ARG,
           aopt_set_literal(0),
@@ -950,6 +956,7 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
           "ping-pong and throughput modes; for maximum use --mps=max; \n\t\t\t\t support --pps for "
           "old compatibility)." },
         { OPT_MPS, AOPT_ARG, aopt_set_literal(0), aopt_set_string("pps"), NULL },
+        /*消息大小，最小为14*/
         { 'm',                                                      AOPT_ARG,
           aopt_set_literal('m'),                                    aopt_set_string("msg-size"),
           "Use messages of size <size> bytes (minimum default 14)." },
@@ -985,7 +992,7 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
     }
 
     /* Set default values */
-    s_user_params.mode = MODE_CLIENT;
+    s_user_params.mode = MODE_CLIENT;/*此情况为client模式*/
     s_user_params.b_stream = true;
     s_user_params.mps = UINT32_MAX;
     s_user_params.reply_every = 1 << (8 * sizeof(s_user_params.reply_every) - 2);
@@ -1002,6 +1009,7 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
 
     /* Set command line specific values */
     if (!rc && self_obj) {
+        /*处理-t选项，设置测试时长*/
         if (!rc && aopt_check(self_obj, 't')) {
             const char *optarg = aopt_value(self_obj, 't');
             if (optarg) {
@@ -1057,6 +1065,7 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
             }
         }
 
+        /*客户端port*/
         if (!rc && aopt_check(self_obj, OPT_CLIENTPORT)) {
             if (aopt_check(common_obj, 'f')) {
                 log_msg("--client_port conflicts with -f option");
@@ -1080,6 +1089,7 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
             }
         }
 
+        /*客户端ip*/
         if (!rc && aopt_check(self_obj, OPT_CLIENTIP)) {
             int len;
             const char *optarg = aopt_value(self_obj, OPT_CLIENTIP);
@@ -1095,6 +1105,7 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
             }
         }
 
+        /*消息大小*/
         if (!rc && aopt_check(self_obj, 'm')) {
             const char *optarg = aopt_value(self_obj, 'm');
             if (optarg) {
@@ -1406,6 +1417,7 @@ static int proc_mode_server(int id, int argc, const char **argv) {
             p_addr->sin_port = htons(5001); /*iperf's default port*/
         }
 
+        /*解析线程数*/
         if (!rc && aopt_check(server_obj, OPT_THREADS_NUM)) {
             if (aopt_check(common_obj, 'f')) {
                 const char *optarg = aopt_value(server_obj, OPT_THREADS_NUM);
@@ -1903,6 +1915,7 @@ static int parse_common_opt(const AOPT_OBJECT *common_obj) {
 #endif
 #endif
 
+        /*指明使用tcp协议*/
         if (!rc && aopt_check(common_obj, OPT_TCP)) {
             if (!aopt_check(common_obj, 'f')) {
                 s_user_params.sock_type = SOCK_STREAM;
@@ -2229,7 +2242,7 @@ void set_defaults() {
     s_user_params.addr.sin_family = AF_INET;
     s_user_params.addr.sin_port = htons(DEFAULT_PORT);
     inet_aton(DEFAULT_MC_ADDR, &s_user_params.addr.sin_addr);
-    s_user_params.sock_type = SOCK_DGRAM;
+    s_user_params.sock_type = SOCK_DGRAM;/*默认使用udp*/
     s_user_params.tcp_nodelay = true;
     s_user_params.mc_ttl = 2;
 
@@ -3069,6 +3082,7 @@ int bringup(const int *p_daemonize) {
     }
 
     if (*p_daemonize) {
+        /*将进程处理为daemon*/
         if (os_daemonize()) {
             log_err("Failed to daemonize");
             rc = SOCKPERF_ERR_FATAL;
@@ -3140,6 +3154,7 @@ int bringup(const int *p_daemonize) {
                     rc = SOCKPERF_ERR_NO_MEMORY;
                 } else {
                     /* create a socket */
+                    /*创建测试所需的socket*/
                     if ((curr_fd = (int)socket(AF_INET, tmp->sock_type, 0)) <
                         0) { // TODO: use SOCKET all over the way and avoid this cast
                         log_err("socket(AF_INET, SOCK_x)");
@@ -3155,7 +3170,7 @@ int bringup(const int *p_daemonize) {
                         } else {
                             int i = 0;
 
-                            s_fd_num = 1;
+                            s_fd_num = 1;/*socket数量为1*/
 
                             for (i = 0; i < MAX_ACTIVE_FD_NUM; i++) {
                                 tmp->active_fd_list[i] = (int)INVALID_SOCKET;
@@ -3198,6 +3213,7 @@ int bringup(const int *p_daemonize) {
         }
 
         if (!rc && (s_user_params.threads_num > s_fd_num || s_user_params.threads_num == 0)) {
+            /*socket数量小于线程总数或者线程数为0，则报错*/
             log_msg("Number of threads should be less than sockets count");
             rc = SOCKPERF_ERR_BAD_ARGUMENT;
         }
@@ -3280,9 +3296,11 @@ void do_test() {
     info.fd_num = s_fd_num;
     switch (s_user_params.mode) {
     case MODE_CLIENT:
+        /*client模式*/
         client_handler(&info);
         break;
     case MODE_SERVER:
+        /*server模式*/
         if (s_user_params.mthread_server) {
             server_select_per_thread(s_fd_num);
         } else {
@@ -3312,9 +3330,11 @@ int main(int argc, char *argv[]) {
             int found = 0;
 
             for (i = 0; sockperf_modes[i].name != NULL; i++) {
+                /*第一参数指明了mode,查找它*/
                 if (strcmp(sockperf_modes[i].name, argv[1]) == 0) {
                     found = 1;
                 } else {
+                    /*通过简短名称进行查找*/
                     for (j = 0; sockperf_modes[i].shorts[j] != NULL; j++) {
                         if (strcmp(sockperf_modes[i].shorts[j], argv[1]) == 0) {
                             found = 1;
@@ -3324,6 +3344,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 if (found) {
+                    /*找到了此模式，执行此模式对应的回调，完成参数解析*/
                     rc = sockperf_modes[i].func(i, argc - 1, (const char **)(argv + 1));
                     break;
                 }
@@ -3461,7 +3482,7 @@ packet pace limit = %d",
         /*
          ** TEST START
          */
-        do_test();
+        do_test();/*执行测试*/
         /*
          ** TEST END
          */

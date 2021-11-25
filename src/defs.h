@@ -629,9 +629,9 @@ struct user_params_t {
     struct in_addr rx_mc_if_addr;
     struct in_addr tx_mc_if_addr;
     struct in_addr mc_source_ip_addr;
-    int msg_size;
+    int msg_size;/*消息大小*/
     int msg_size_range;
-    int sec_test_duration;
+    int sec_test_duration;/*测试时长*/
     bool data_integrity;
     fd_block_handler_t fd_handler_type;
     unsigned int packetrate_stats_print_ratio;
@@ -641,7 +641,7 @@ struct user_params_t {
     int mthread_server;
     struct timeval *select_timeout;
     int sock_buff_size;
-    int threads_num;
+    int threads_num;/*测试线程数*/
     char threads_affinity[MAX_ARGV_SIZE];
     bool is_blocked;
     bool do_warmup;
@@ -658,7 +658,7 @@ struct user_params_t {
     bool b_server_dont_reply;
     bool b_server_detect_gaps;
     uint32_t mps; // client side only
-    struct sockaddr_in client_bind_info;
+    struct sockaddr_in client_bind_info;/*客户端地址端口*/
     uint32_t reply_every;    // client side only
     bool b_client_ping_pong; // client side only
     bool b_no_rdtsc;
@@ -671,11 +671,11 @@ struct user_params_t {
     bool b_stream;                   // client side only
     PlaybackVector *pPlaybackVector; // client side only
     struct sockaddr_in addr;
-    int sock_type;
+    int sock_type;/*采用哪种socket,udp/tcp,默认采用udp*/
     bool tcp_nodelay;
     bool is_nonblocked_send;
     int mc_ttl;
-    int daemonize;
+    int daemonize;/*是否以daemon进行运行*/
     char feedfile_name[MAX_PATH_LENGTH];
     bool withsock_accl;
     int max_looping_over_recv;

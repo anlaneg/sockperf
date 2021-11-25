@@ -37,7 +37,7 @@
 
 // static memebers initialization
 /*static*/ uint64_t Message::ms_maxSequenceNo;
-/*static*/ int Message::ms_maxSize;
+/*static*/ int Message::ms_maxSize;/*消息的最大尺寸*/
 
 //------------------------------------------------------------------------------
 class MemException : public std::exception {

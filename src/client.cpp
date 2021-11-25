@@ -834,6 +834,7 @@ void client_handler(handler_info *p_info) {
             break;
         }
         case RECVFROM: {
+            /*默认采用此模式*/
             client_handler<IoRecvfrom>(p_info->fd_min, p_info->fd_max, p_info->fd_num);
             break;
         }

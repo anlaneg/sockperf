@@ -227,6 +227,7 @@ protected:
         return ms_mode == RDTSC ? TicksImplRdtsc::ticks2nsec(_val)
                                 : TicksImplClock::ticks2nsec(_val);
     }
+    /*取当前的ticks*/
     inline static ticks_t getCurrentTicks() {
         return ms_mode == RDTSC ? TicksImplRdtsc::getCurrentTicks()
                                 : TicksImplClock::getCurrentTicks();
